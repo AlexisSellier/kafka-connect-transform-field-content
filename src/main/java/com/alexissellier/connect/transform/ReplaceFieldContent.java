@@ -25,9 +25,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import static org.apache.kafka.connect.transforms.util.Requirements.requireMap;
 
-public abstract class ReplaceFieldContent<R extends ConnectRecord<R>> implements Transformation<R> {
+public class ReplaceFieldContent<R extends ConnectRecord<R>> implements Transformation<R> {
 
     public static final String OVERVIEW_DOC = "Rename fields content";
     
@@ -77,7 +78,6 @@ public abstract class ReplaceFieldContent<R extends ConnectRecord<R>> implements
 
 
     String renamed(String value) {
-	System.out.println("Renaming " + value);
         final String mapping = renames.get(value);
         return mapping == null ? value : mapping;
     }
@@ -89,7 +89,11 @@ public abstract class ReplaceFieldContent<R extends ConnectRecord<R>> implements
 	boolean exists = false;
 	if (e != null) {
 	    exists = true;
-	    value.put(this.fieldname, this.renamed((String) e));
+	    if (e  instanceof java.lang.Long) {
+		value.put(this.fieldname, this.renamed(String.valueOf(e)));   
+	    } else {
+		value.put(this.fieldname, this.renamed((String) e));
+	    }
 	}
 	return exists ? record.newRecord(record.topic(), record.kafkaPartition(), record.keySchema(), record.key(), null, value, record.timestamp()) : record;
     }
